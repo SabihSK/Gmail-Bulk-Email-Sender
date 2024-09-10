@@ -34,13 +34,19 @@ def read_student_data(file_path):
         )
 
 
+def load_html_template(file_path):
+    """Load HTML file as a template"""
+    with open(file_path, "r", encoding="utf-8") as file:
+        return file.read()
+
+
 def send_email(server, to_email, sender_name, subject, body, from_email):
     """Function to send email"""
-    msg = MIMEMultipart()
+    msg = MIMEMultipart("alternative")
     msg["From"] = sender_name + " <" + from_email + ">"
     msg["To"] = to_email
     msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain"))
+    msg.attach(MIMEText(body, "html"))
 
     try:
         server.sendmail(from_email, to_email, msg.as_string())
@@ -65,6 +71,9 @@ def send_emails_to_students(
         server.login(from_email, email_password)
         logging.info("Logged into the email server successfully.")
 
+        # Load the HTML template once
+        template_html = load_html_template("email_template.html")
+
         for index, row in student_data.iterrows():
             name = row["Name"]
             email = row["email"]
@@ -73,29 +82,14 @@ def send_emails_to_students(
 
             # Prepare the email content
             subject = "PPL - Login Details"
-            body = f"""
-Dear {name},
 
-You are requested to attempt your test.
-
-Below are your login details for the portal:
-
-Portal URL: {portal_url}
-Username: {username}
-Password: {password}
-
-Please use this information to access your account.
-
-Test Duration: 1 Hour
-No. of Questions: 30
-All questions are important to answer
-
-Date: 18th Sept 2024
-Link availble from 2:00PM to 5:00PM
-
-Best regards,
-PPL
-"""
+            # Replace placeholders with actual data
+            body = (
+                template_html.replace("{{name}}", name)
+                .replace("{{portal_url}}", portal_url)
+                .replace("{{username}}", username)
+                .replace("{{password}}", password)
+            )
 
             # Send the email
             send_email(
