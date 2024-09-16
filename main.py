@@ -5,6 +5,7 @@ import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import time
 
 import pandas as pd
 
@@ -46,7 +47,7 @@ def send_email(server, to_email, sender_name, subject, body, from_email):
     msg["From"] = sender_name + " <" + from_email + ">"
     msg["To"] = to_email
     msg["Subject"] = subject
-    msg.attach(MIMEText(body, "html"))
+    msg.attach(MIMEText(body, "plain"))
 
     try:
         server.sendmail(from_email, to_email, msg.as_string())
@@ -81,17 +82,47 @@ def send_emails_to_students(
             password = row["password"]
 
             # Prepare the email content
-            subject = "PPL - Login Details"
+            subject = "DGF-PPL - Login Details"
 
             # Replace placeholders with actual data
-            body = (
-                template_html.replace("{{name}}", name)
-                .replace("{{portal_url}}", portal_url)
-                .replace("{{username}}", username)
-                .replace("{{password}}", password)
-            )
+            body = f"""
+Dear {name},\n
+We are pleased to inform you that your online entrance test is scheduled for September 18, 2024. Below are your personal login credentials. Kindly ensure you do not share them with anyone.\n
+https://www.classmarker.com/\n
+Login Name: {username}\n
+Password: {password}\n
+A detailed video on how to take the test has been uploaded. Please follow the link below to watch the video and familiarize yourself with the process:\n
+https://www.youtube.com/watch?v=Jbl6w3XfC8g (youtube.com)\n
+\n
+Important Instructions:\n
+The test will consist of 30 multiple-choice questions (MCQs), and the allotted time is 1 hour.\n
+The test link will be live on September 18, from 2:00 PM to 5:00 PM. You may attempt the test within this 3-hour window.\n
+\n
+Note: Only one attempt will be allowed once you sign in on ClassMarker.com.\n
+Once you start the test, it is timed and will automatically end after 60 minutes, regardless of how much you have completed. Please ensure you finish and submit your answers within one hour.\n
+Cheating, screen toggling, or copy-pasting is strictly prohibited. Any such activity will result in disqualification, as we receive notifications for these violations.\n
+If your internet connection is lost during the test, you can resume it once the connection is restored without impacting your score.\n
+You can take the test on a laptop, PC, or any mobile device.\n
+After completing the test, please ensure to submit it within the allotted 1 hour.\n
+The results will be compiled, and qualified candidates will be notified within a week to proceed to an online interview. Only those who perform well on the test and pass the interview will be invited to join the training in Karachi.\n
+If you do not get selected this time, we encourage you not to lose hope and try again in the future.\n
+\n
+During the 3-hour test window, if you face any issues with the testing system, please reach out to our support team immediately:\n
+Ali: 0329 - 2014749\n
+Sabih: 0331 - 8055712\n
+Best regards\n
+DGF-PPL Team\n
+"""
+
+            # (
+            #     template_html.replace("{{name}}", name)
+            #     .replace("{{portal_url}}", portal_url)
+            #     .replace("{{username}}", username)
+            #     .replace("{{password}}", password)
+            # )
 
             # Send the email
+            time.sleep(10)
             send_email(
                 server,
                 email,
@@ -112,7 +143,7 @@ def send_emails_to_students(
 # Main execution
 if __name__ == "__main__":
     # Path to your CSV or Excel file
-    FILE_PATH = "students_data.xlsx"  # or "students_data.csv"
+    FILE_PATH = "updated.xlsx"  # or "students_data.csv"
 
     # Send emails to all students
     send_emails_to_students(
